@@ -1,13 +1,13 @@
 from flask import Flask, request
 import json
 import logging
-from flask_ngrok import run_with_ngrok
 import git
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-
+#Это понадобится если нужен будет туннель
+# from flask_ngrok import run_with_ngrok
 # run_with_ngrok(app)  # Запустить ngrok при запуске приложения, нужен для проброски тоннеля сервера
 # if __name__ == '__main__':
 #     app.run()
@@ -50,6 +50,7 @@ def main():
         return start_learning()
     else:
         return fallback()
+
 
 @app.route('/update_server', methods=['POST'])
 def webhook():
