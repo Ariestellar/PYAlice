@@ -51,7 +51,7 @@ def main():
     else:
         return fallback()
 
-
+#test
 @app.route('/update_server', methods=['POST'])
 def webhook():
     if request.method == 'POST':
