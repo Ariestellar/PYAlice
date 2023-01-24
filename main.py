@@ -1,9 +1,8 @@
 from flask import Flask, request
 import json
 import logging
-#
 from flask_ngrok import run_with_ngrok
-from pip._internal.vcs import git
+import git
 
 app = Flask(__name__)
 run_with_ngrok(app)  # Запустить ngrok при запуске приложения, нужен для проброски тоннеля сервера
@@ -48,13 +47,11 @@ def main():
     else:
         return fallback()
 
-
+#git remote add origin https://github.com/Ariestellar/PYAlice.git
 @app.route('/update_server', methods=['POST'])
 def webhook():
     if request.method == 'POST':
-        repo = git.Repo('path/to/git_repo')
-        origin = repo.remotes.origin
-        origin.pull()
+        git.Repo()
         return 'Updated PythonAnywhere successfully', 200
     else:
         return 'Wrong event type', 400
