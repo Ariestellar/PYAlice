@@ -39,12 +39,17 @@ def welcome_message():
 
 @app.route('/', methods=["POST"])
 def main():
-    return {
-        'response': {
-            'text': 'Привет',
-        },
-        'version': '1.0'
-    }
+    req = request.json
+    intents = req['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
+    print(intents)
+    if req['session']['new']:
+        return welcome_message()
+    elif 'start_test' in intents:
+        return start_test()
+    elif 'start_learning' in intents:
+        return start_learning()
+    else:
+        return fallback()
 
 @app.route('/update_server', methods=['POST'])
 def webhook():
