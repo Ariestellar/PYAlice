@@ -33,7 +33,7 @@ def start_learning():
 
 
 def welcome_message():
-    text = 'Приветcтвенное сообщение!'
+    text = 'Приветcтвенное сообщение!!'
     return make_response(text)
 
 
