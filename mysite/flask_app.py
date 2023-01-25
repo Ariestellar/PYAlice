@@ -83,10 +83,12 @@ def goodbye_message():
 def main():
     event = request.json
     intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
-    logging.info('Intents-state:' + intents)
+    logging.info('Intents-state:')
+    logging.info(intents)
     state = event['interfaces'].get(STATE_REQUEST_KEY, {})  # Достаем состояние из запроса
     logging.info('STATE_REQUEST_KEY:' + STATE_REQUEST_KEY)
-    logging.info('CurrentState:' + state)
+    logging.info('CurrentState:')
+    logging.info(state)
     print(intents)
     if event['session']['new']:
         return welcome_message()
