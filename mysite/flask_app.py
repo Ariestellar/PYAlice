@@ -72,7 +72,7 @@ def welcome_message():
     return make_response(text)
 
 
-def welcome_message():
+def goodbye_message():
     text = 'Всего доброго!'
 
     return make_response(text)
