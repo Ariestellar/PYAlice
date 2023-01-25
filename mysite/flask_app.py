@@ -15,7 +15,7 @@ def make_response(text, state=None, buttons=None):
     if state is not None:
         response[STATE_RESPONSE_KEY] = state
     if buttons:
-        response['buttons'] = buttons
+        response['response']['buttons'] = buttons
     return response
 
 
