@@ -69,7 +69,9 @@ def welcome_message():
            'Учимся или тестируем знания?'
 
     # Кнопки: Тест, Учиться, Что ты умеешь? Инита помощь, Выход, Повтори
-    return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'), button('Выход'), button('Повтори')])
+    return make_response(text,
+                         buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
+                                  button('Выход'), button('Повтори')])
 
 
 def goodbye_message():
@@ -81,7 +83,10 @@ def goodbye_message():
 def main():
     event = request.json
     intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
-    state = event['state'].get(STATE_REQUEST_KEY, {})  # Достаем состояние из запроса
+    logging.info('Intents-state:' + intents)
+    state = event['interfaces'].get(STATE_REQUEST_KEY, {})  # Достаем состояние из запроса
+    logging.info('STATE_REQUEST_KEY:' + STATE_REQUEST_KEY)
+    logging.info('CurrentState:' + state)
     print(intents)
     if event['session']['new']:
         return welcome_message()
