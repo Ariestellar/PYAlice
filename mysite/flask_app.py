@@ -102,7 +102,7 @@ def main():
         return fallback(event)
 
 
-def button(title, hide=False):
+def button(title, hide=True):
     return {'title': title, 'hide': hide, }
 
 
