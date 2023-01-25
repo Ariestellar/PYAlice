@@ -88,9 +88,8 @@ def main():
     intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
     logging.info('Intents-state:')
     logging.info(intents)
-    state = event['state']['session']['ssds']  # Достаем состояние из запроса
+    state = event['state']['session'].get('ssds', {})  # Достаем состояние из запроса
     logging.info('CurrentState:')
-    logging.info(state)
     if event['session']['new']:
         return welcome_message()
     elif state == 'test':
