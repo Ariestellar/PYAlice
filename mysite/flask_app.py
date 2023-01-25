@@ -18,7 +18,8 @@ def make_response(text, state=None, buttons=None):
 
 def fallback(event):
     text = 'Прости, не расслышал, повтори ещё раз или выбери вручную.'
-    return make_response(text, event['meta']['interfaces']['screen'])  # Возвращаем текщее состояние, что бы не сбросилось
+    return make_response(text,
+                         event['meta']['interfaces']['screen'])  # Возвращаем текщее состояние, что бы не сбросилось
 
 
 def test(intent_name=None):
@@ -87,13 +88,13 @@ def main():
     intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
     logging.info('Intents-state:')
     logging.info(intents)
-    #state = event['request']['state']['session']['value']  # Достаем состояние из запроса
+    state = event['session_state']['screen']  # Достаем состояние из запроса
     logging.info('CurrentState:')
-    #logging.info(state)
+    logging.info(state)
     if event['session']['new']:
         return welcome_message()
-    # elif state.get('screen') == 'test':
-    #     return test()
+    elif state == 'test':
+        return test()
     elif 'menu' in intents:
         return menu()
     elif 'test' in intents:
