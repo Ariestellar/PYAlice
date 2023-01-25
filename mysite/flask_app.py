@@ -87,13 +87,13 @@ def main():
     intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
     logging.info('Intents-state:')
     logging.info(intents)
-    state = event['request']['state']['session']['value']  # Достаем состояние из запроса
+    #state = event['request']['state']['session']['value']  # Достаем состояние из запроса
     logging.info('CurrentState:')
-    logging.info(state)
+    #logging.info(state)
     if event['session']['new']:
         return welcome_message()
-    elif state.get('screen') == 'test':
-        return test()
+    # elif state.get('screen') == 'test':
+    #     return test()
     elif 'menu' in intents:
         return menu()
     elif 'test' in intents:
