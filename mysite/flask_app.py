@@ -88,7 +88,7 @@ def main():
     intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
     logging.info('Intents-state:')
     logging.info(intents)
-    state = event.get('screen').get('session_state', {})  # Достаем состояние из запроса
+    state = event['request'].get('screen').get('session_state', {})  # Достаем состояние из запроса
     logging.info('CurrentState:')
     logging.info(state)
     if event['session']['new']:
