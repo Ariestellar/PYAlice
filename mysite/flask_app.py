@@ -81,28 +81,31 @@ def goodbye_message():
     text = 'Всего доброго!'
     return make_response(text)
 
-
-@app.route('/', methods=["POST"])
-def main():
-    event = request.json
-    intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
-    logging.info('Intents-state:')
-    logging.info(intents)
+def handler(event, context):
     state = event.get('screen').get('session_state', {})  # Достаем состояние из запроса
-    logging.info('CurrentState:')
-    logging.info(state)
-    if event['session']['new']:
-        return welcome_message()
-    elif state == 'test':
-        return test()
-    elif 'menu' in intents:
-        return menu()
-    elif 'test' in intents:
-        return test()
-    elif 'learning' in intents:
-        return learning()
-    else:
-        return fallback(event)
+    return fallback(event)
+
+#@app.route('/', methods=["POST"])
+def main():
+    # event = request.json
+    # intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
+    # logging.info('Intents-state:')
+    # logging.info(intents)
+    # state = event.get('screen').get('session_state', {})  # Достаем состояние из запроса
+    # logging.info('CurrentState:')
+    # logging.info(state)
+    # if event['session']['new']:
+    #     return welcome_message()
+    # elif state == 'test':
+    #     return test()
+    # elif 'menu' in intents:
+    #     return menu()
+    # elif 'test' in intents:
+    #     return test()
+    # elif 'learning' in intents:
+    #     return learning()
+    # else:
+    #     return fallback(event)
 
 
 def button(title, hide=True):
