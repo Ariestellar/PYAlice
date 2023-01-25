@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 def make_response(text, state=None, buttons=None):
     response = {'response': {'text': text}, 'version': '1.0'}
     if state is not None:
-        response['session_state']['screen'] = state
+        response['response']['session_state']['value'] = state
     if buttons:
         response['response']['buttons'] = buttons
     return response
