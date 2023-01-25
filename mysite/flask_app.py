@@ -6,14 +6,11 @@ import git
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-STATE_REQUEST_KEY = 'session'
-STATE_RESPONSE_KEY = 'session_state'
-
 
 def make_response(text, state=None, buttons=None):
     response = {'response': {'text': text}, 'version': '1.0'}
     if state is not None:
-        response[STATE_RESPONSE_KEY] = state
+        response['response']['interfaces']['screen'] = state
     if buttons:
         response['response']['buttons'] = buttons
     return response
@@ -21,8 +18,7 @@ def make_response(text, state=None, buttons=None):
 
 def fallback(event):
     text = 'Прости, не расслышал, повтори ещё раз или выбери вручную.'
-    return make_response(text, event.get('state').get(STATE_REQUEST_KEY,
-                                                      {}))  # Возвращаем текщее состояние, что бы не сбросилось
+    return make_response(text, event['meta']['interfaces']['screen'])  # Возвращаем текщее состояние, что бы не сбросилось
 
 
 def test(intent_name=None):
@@ -31,7 +27,7 @@ def test(intent_name=None):
            'Для выхода в меню скажи: «Меню».' \
            'Если не хочешь отвечать на вопрос, скажи: «Пропустить».' \
            'Команда: «Ответ Инита», поможет узнать правильный ответ.'
-    return make_response(text, state={'screen': 'test'})
+    return make_response(text, state='test')
 
 
 def about_skill():
@@ -57,7 +53,7 @@ def support():
 def learning():
     text = 'Давай начнем.' \
            'Для повтора скажи: «Повторить», для возврата в главное меню скажи: «Назад», для перехода к следующему оператору скажи: «Дальше».'
-    return make_response(text, state={'screen': 'test'})
+    return make_response(text, state='learning')
 
 
 def welcome_message():
@@ -87,7 +83,6 @@ def main():
     logging.info('Intents-state:')
     logging.info(intents)
     state = event['meta']['interfaces']['screen']  # Достаем состояние из запроса
-    logging.info('STATE_REQUEST_KEY:' + STATE_REQUEST_KEY)
     logging.info('CurrentState:')
     logging.info(state)
     print(intents)
