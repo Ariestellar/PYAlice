@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 def make_response(text, state=None, buttons=None):
     response = {'response': {'text': text}, 'session_state': {}, 'version': '1.0'}
     if state is not None:
-        response['session_state']['screen'] = state
+        response['session_state']['ssds'] = state
     if buttons:
         response['response']['buttons'] = buttons
     return response
@@ -88,14 +88,13 @@ def main():
     intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
     logging.info('Intents-state:')
     logging.info(intents)
-    #state = event['request'].get('screen').get('session_state', {})  # Достаем состояние из запроса
-    state = event['request']  # Достаем состояние из запроса
+    state = event['request']['state']['session']['screen']  # Достаем состояние из запроса
     logging.info('CurrentState:')
     logging.info(state)
     if event['session']['new']:
         return welcome_message()
-    #elif state == 'test':
-        #return test()
+    elif state == 'test':
+        return test()
     elif 'menu' in intents:
         return menu()
     elif 'test' in intents:
