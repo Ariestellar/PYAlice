@@ -64,9 +64,10 @@ def welcome_message():
     text = 'Привет! Меня зовут Инита. Я, навык, который станет помощником в мире кода Python и ' \
            'Я тестирую твои знания и помогу обучиться новому.' \
            'Если возникнут вопросы о моей функциональности, скажи: «Инита, что ты умеешь?».' \
-           'По другим вопросам тебе поможет команда: «Инита, помощь».'
-
-    return menu()
+           'По другим вопросам тебе поможет команда: «Инита, помощь».' \
+           'С чего начнём? ' \
+           'Учимся или тестируем знания?'
+    return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'), button('Выход'), button('Повтори')])
 
 
 def menu():
@@ -94,6 +95,8 @@ def main():
         return welcome_message()
     elif state.get('screen') == 'test':
         return test()
+    elif 'menu' in intents:
+        return menu()
     elif 'test' in intents:
         return test()
     elif 'learning' in intents:
