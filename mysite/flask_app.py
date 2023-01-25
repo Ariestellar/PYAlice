@@ -86,7 +86,7 @@ def handler(event, context):
     return fallback(event)
 
 #@app.route('/', methods=["POST"])
-def main():
+#def main():
     # event = request.json
     # intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
     # logging.info('Intents-state:')
