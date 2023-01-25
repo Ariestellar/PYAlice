@@ -8,9 +8,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def make_response(text, state=None, buttons=None):
-    response = {'response': {'text': text}, 'version': '1.0'}
+    response = {'response': {'text': text}, 'session_state': {}, 'version': '1.0'}
     if state is not None:
-        response['response']['session_state']['value'] = state
+        response['session_state']['value'] = state
     if buttons:
         response['response']['buttons'] = buttons
     return response
@@ -18,7 +18,8 @@ def make_response(text, state=None, buttons=None):
 
 def fallback(event):
     text = 'Прости, не расслышал, повтори ещё раз или выбери вручную.'
-    return make_response(text, event['meta']['interfaces']['screen'])  # Возвращаем текщее состояние, что бы не сбросилось
+    return make_response(text,
+                         event['meta']['interfaces']['screen'])  # Возвращаем текщее состояние, что бы не сбросилось
 
 
 def test(intent_name=None):
@@ -63,13 +64,18 @@ def welcome_message():
            'По другим вопросам тебе поможет команда: «Инита, помощь».' \
            'С чего начнём? ' \
            'Учимся или тестируем знания?'
-    return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'), button('Выход'), button('Повтори')])
+    return make_response(text,
+                         buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
+                                  button('Выход'), button('Повтори')])
 
 
 def menu():
     text = 'С чего начнём? ' \
            'Учимся или тестируем знания?'
-    return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'), button('Выход'), button('Повтори')])
+    return make_response(text,
+                         buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
+                                  button('Выход'), button('Повтори')])
+
 
 def goodbye_message():
     text = 'Всего доброго!'
