@@ -2,32 +2,45 @@ from flask import Flask, request
 import json
 import logging
 import git
+import gspread
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+# Указываем путь к JSON с ключами для GoogleSheets
+googleSheetsAPI = gspread.service_account(filename='pyalice-68958b2cdb2b.json')
+
+#Открываем таблицу с тестом
+tableWithTest = googleSheetsAPI.open_by_key('1r9DtG5vVRb71lgD-Mlr-42VhUog3q0HvkW7TvgpNbsM')
+#Получаем список тестовых вопросов
+list_test_questions = tableWithTest.sheet1.get_all_values()
+#print(list_test_questions)
 
 def make_response(text, state=None, buttons=None):
     response = {'response': {'text': text}, 'session_state': {}, 'version': '1.0'}
     if state is not None:
-        response['session_state']['ssds'] = state
+        response['session_state']['currentState'] = state
     if buttons:
         response['response']['buttons'] = buttons
     return response
 
 
-def fallback(event):
+def fallback(state):
     text = 'Прости, не расслышал, повтори ещё раз или выбери вручную.'
-    return make_response(text,
-                         event['meta']['interfaces']['screen'])  # Возвращаем текщее состояние, что бы не сбросилось
+    return make_response(text, state)  #Возвращаем текщее состояние, что бы не сбросилось
 
 
-def test(intent_name=None):
+def test():  # Запуск режима тестирования
     text = 'Начинаю тестирование.' \
            'Операторы Python и теги HTML.' \
            'Для выхода в меню скажи: «Меню».' \
            'Если не хочешь отвечать на вопрос, скажи: «Пропустить».' \
-           'Команда: «Ответ Инита», поможет узнать правильный ответ.'
+           'Команда: «Ответ Инита», поможет узнать правильный ответ.' + list_test_questions[1][1]
+    return make_response(text, state='test')
+
+
+def testing():  # Процесс тестирования
+    text = 'Текущий вопрос'
     return make_response(text, state='test')
 
 
@@ -64,17 +77,13 @@ def welcome_message():
            'По другим вопросам тебе поможет команда: «Инита, помощь».' \
            'С чего начнём? ' \
            'Учимся или тестируем знания?'
-    return make_response(text,
-                         buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
-                                  button('Выход'), button('Повтори')])
+    return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'), button('Выход'), button('Повтори')])
 
 
 def menu():
     text = 'С чего начнём? ' \
            'Учимся или тестируем знания?'
-    return make_response(text,
-                         buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
-                                  button('Выход'), button('Повтори')])
+    return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'), button('Выход'), button('Повтори')])
 
 
 def goodbye_message():
@@ -86,10 +95,7 @@ def goodbye_message():
 def main():
     event = request.json
     intents = event['request'].get('nlu', {}).get('intents')  # Достаем словарь интентов из запроса
-    logging.info('Intents-state:')
-    logging.info(intents)
-    state = event['state']['session'].get('ssds', {})  # Достаем состояние из запроса
-    logging.info('CurrentState:')
+    state = event['state']['session'].get('currentState', {})  # Достаем состояние из запроса
     if event['session']['new']:
         return welcome_message()
     elif state == 'test':
@@ -97,11 +103,11 @@ def main():
     elif 'menu' in intents:
         return menu()
     elif 'test' in intents:
-        return test()
+        return testing()
     elif 'learning' in intents:
         return learning()
     else:
-        return fallback(event)
+        return fallback(state)
 
 
 def button(title, hide=True):
