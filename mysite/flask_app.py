@@ -58,6 +58,7 @@ def testing(event):  # Процесс тестирования
     elif 'give_answer' in intents:
         text = list_test_questions[current_question_index][3]
         current_question_index += 1
+        text += list_test_questions[current_question_index][1]
         return make_response(text, state='test', data_session={'currentQuestionIndex': current_question_index})
 
     # Проверяем ответы, если не сработали интенты
