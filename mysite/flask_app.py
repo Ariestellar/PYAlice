@@ -39,8 +39,11 @@ def test():  # Запуск режима тестирования
     return make_response(text, state='test')
 
 
-def testing():  # Процесс тестирования
-    text = 'Текущий вопрос'
+def testing(request):  # Процесс тестирования
+    if request.get('command') == list_test_questions[1][2]:
+        text = 'Верный ответ'
+    else:
+        text = 'Не верный ответ'
     return make_response(text, state='test')
 
 
@@ -99,7 +102,7 @@ def main():
     if event['session']['new']:
         return welcome_message()
     elif state == 'test':
-        return testing()
+        return testing(event['request'])
     elif 'menu' in intents:
         return menu()
     elif 'test' in intents:
