@@ -99,11 +99,11 @@ def main():
     if event['session']['new']:
         return welcome_message()
     elif state == 'test':
-        return test()
+        return testing()
     elif 'menu' in intents:
         return menu()
     elif 'test' in intents:
-        return testing()
+        return test()
     elif 'learning' in intents:
         return learning()
     else:
