@@ -49,18 +49,19 @@ def test():  # Запуск режима тестирования
 
 
 def testing(event):  # Процесс тестирования
+    buttons = [button('Пропустить'), button('Ответ ИНИТА'), button('В меню')]
     current_question_index = event['state']['session'].get('currentQuestionIndex', {})
     intents = event['request'].get('nlu', {}).get('intents')
     # Обрабатываем интенты «Пропустить» и «Ответ Инита»
     if 'skip' in intents:
         current_question_index += 1
         text = list_test_questions[current_question_index][1]
-        return make_response(text, state='test', data_session={'currentQuestionIndex': current_question_index})
+        return make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
     elif 'give_answer' in intents:
         text = list_test_questions[current_question_index][3]
         current_question_index += 1
         text += '\n\n' + list_test_questions[current_question_index][1]
-        return make_response(text, state='test', data_session={'currentQuestionIndex': current_question_index})
+        return make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
 
     # Проверяем ответы, если не сработали интенты
     if event['request'].get('command') == list_test_questions[current_question_index][2].lower():
@@ -69,8 +70,7 @@ def testing(event):  # Процесс тестирования
     else:
         text = 'Не верный ответ'
 
-    return make_response(text, state='test', buttons=[button('Пропустить'), button('Ответ ИНИТА'), button('В меню')],
-                         data_session={'currentQuestionIndex': current_question_index})
+    return make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
 
 
 def about_skill():
