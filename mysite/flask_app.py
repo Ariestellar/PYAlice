@@ -40,7 +40,7 @@ def test():  # Запуск режима тестирования
 
 
 def testing(request):  # Процесс тестирования
-    if request.get('command') == list_test_questions[1][2]:
+    if request.get('command') == list_test_questions[1][2].lower():
         text = 'Верный ответ'
     else:
         text = 'Не верный ответ'
