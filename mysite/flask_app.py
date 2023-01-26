@@ -39,11 +39,12 @@ def fallback(state):
 
 
 def test():  # Запуск режима тестирования
-    text = 'Начинаю тестирование.' \
-           'Операторы Python и теги HTML.' \
-           'Для выхода в меню скажи: «Меню».' \
-           'Если не хочешь отвечать на вопрос, скажи: «Пропустить».' \
-           'Команда: «Ответ Инита», поможет узнать правильный ответ.' + list_test_questions[1][1]
+    text = 'Начинаю тестирование.\n' \
+           'Операторы Python и теги HTML.\n' \
+           'Для выхода в меню скажи: «Меню».\n' \
+           'Если не хочешь отвечать на вопрос, скажи: «Пропустить».\n' \
+           'Команда: «Ответ Инита», поможет узнать правильный ответ.\n' \
+           + list_test_questions[1][1]
     return make_response(text, state='test', data_session={'currentQuestionIndex': 1})
 
 
@@ -58,33 +59,35 @@ def testing(event):  # Процесс тестирования
     elif 'give_answer' in intents:
         text = list_test_questions[current_question_index][3]
         current_question_index += 1
-        text += list_test_questions[current_question_index][1]
+        text += '\n\n' + list_test_questions[current_question_index][1]
         return make_response(text, state='test', data_session={'currentQuestionIndex': current_question_index})
 
     # Проверяем ответы, если не сработали интенты
     if event['request'].get('command') == list_test_questions[current_question_index][2].lower():
         current_question_index += 1
-        text = 'Верный ответ\n' + list_test_questions[current_question_index][1]
+        text = 'Верный ответ\n\n' + list_test_questions[current_question_index][1]
     else:
         text = 'Не верный ответ'
 
-    return make_response(text, state='test', data_session={'currentQuestionIndex': current_question_index})
+    return make_response(text, state='test', buttons=[button('Пропустить'), button('Ответ ИНИТА'), button('В меню')],
+                         data_session={'currentQuestionIndex': current_question_index})
 
 
 def about_skill():
-    text = 'Спасибо, что поинтересовались.' \
-           ' Я могу рассказать об операторах Python и тегах HTML,' \
+    text = 'Спасибо, что поинтересовались.\n' \
+           ' Я могу рассказать об операторах Python и тегах HTML,\n' \
            ' а также протестировать твои знания.'
     return make_response(text)
 
 
 def support():
-    text = 'Возможности "ИНИТА GO":' \
-           'Для начала тестирования скажи "Тест".' \
-           'Я буду задавать вопросы по тегам Python и HTML.' \
-           'Если ответишь неверно  -  подскажу правильный вариант.' \
+    text = 'Возможности "ИНИТА GO":\n' \
+           'Для начала тестирования скажи "Тест".\n' \
+           'Я буду задавать вопросы по тегам Python и HTML.\n' \
+           'Если ответишь неверно  -  подскажу правильный вариант.\n' \
            'В разделе обучения расскажу какие теги HTML, операторы и ключевые слова Python существуют и для чего они ' \
-           'используются. Если хочешь начать, скажи "Учиться".' \
+           'используются.\n' \
+           'Если хочешь начать, скажи "Учиться".\n' \
            'Чтобы связаться с моими авторами, скажи "Связаться с разработчиком" и опиши свой вопрос или пожелание.'
     # Кнопки: Связь с разработчиками, Тест, Учиться, Выход, Повтори
 
@@ -93,17 +96,18 @@ def support():
 
 
 def learning():
-    text = 'Давай начнем.' \
-           'Для повтора скажи: «Повторить», для возврата в главное меню скажи: «Назад», для перехода к следующему оператору скажи: «Дальше».'
+    text = 'Давай начнем.\n' \
+           'Для повтора скажи: «Повторить»,\n для возврата в главное меню скажи: «Назад»,\n для перехода к следующему оператору скажи: «Дальше».'
     return make_response(text, state='learning')
 
 
 def welcome_message():
-    text = 'Привет! Меня зовут Инита. Я, навык, который станет помощником в мире кода Python и ' \
-           'Я тестирую твои знания и помогу обучиться новому.' \
-           'Если возникнут вопросы о моей функциональности, скажи: «Инита, что ты умеешь?».' \
-           'По другим вопросам тебе поможет команда: «Инита, помощь».' \
-           'С чего начнём? ' \
+    text = 'Привет! Меня зовут Инита.\n' \
+           'Я, навык, который станет помощником в мире кода Python и HTML\n' \
+           'Я тестирую твои знания и помогу обучиться новому.\n' \
+           'Если возникнут вопросы о моей функциональности, скажи: «Инита, что ты умеешь?».\n' \
+           'По другим вопросам тебе поможет команда: «Инита, помощь».\n' \
+           'С чего начнём?\n' \
            'Учимся или тестируем знания?'
     return make_response(text,
                          buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
@@ -111,7 +115,7 @@ def welcome_message():
 
 
 def menu():
-    text = 'С чего начнём? ' \
+    text = 'С чего начнём?\n' \
            'Учимся или тестируем знания?'
     return make_response(text,
                          buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
