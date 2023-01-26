@@ -14,10 +14,18 @@ googleSheetsAPI = gspread.service_account(filename='pyalice-68958b2cdb2b.json')
 tableWithTest = googleSheetsAPI.open_by_key('1r9DtG5vVRb71lgD-Mlr-42VhUog3q0HvkW7TvgpNbsM')
 #Получаем список тестовых вопросов
 list_test_questions = tableWithTest.sheet1.get_all_values()
-#print(list_test_questions)
+#Массив первого порядка это каждый вопрос массив второго порядка это элементы вопроса у них индексы:
+#Индексы:
+# 0 - номер по порядку
+# 1 - текст вопроса
+# 2 - ответ на вопрос
+# 3 - правильный развернутый ответ
 
-def make_response(text, state=None, buttons=None):
+
+def make_response(text, state=None, buttons=None, data_session=None):
     response = {'response': {'text': text}, 'session_state': {}, 'version': '1.0'}
+    if data_session is not None:
+        response['session_state'] = data_session
     if state is not None:
         response['session_state']['currentState'] = state
     if buttons:
@@ -36,15 +44,17 @@ def test():  # Запуск режима тестирования
            'Для выхода в меню скажи: «Меню».' \
            'Если не хочешь отвечать на вопрос, скажи: «Пропустить».' \
            'Команда: «Ответ Инита», поможет узнать правильный ответ.' + list_test_questions[1][1]
-    return make_response(text, state='test')
+    return make_response(text, state='test', data_session={'currentQuestionIndex': 1})
 
 
-def testing(request):  # Процесс тестирования
-    if request.get('command') == list_test_questions[1][2].lower():
-        text = 'Верный ответ'
+def testing(event):  # Процесс тестирования
+    current_question_index = event['state']['session'].get('currentQuestionIndex', {})
+    if event['request'].get('command') == list_test_questions[current_question_index][2].lower():
+        current_question_index += 1
+        text = 'Верный ответ' + list_test_questions[current_question_index][1]
     else:
         text = 'Не верный ответ'
-    return make_response(text, state='test')
+    return make_response(text, state='test', data_session={'currentQuestionIndex': current_question_index})
 
 
 def about_skill():
@@ -102,7 +112,7 @@ def main():
     if event['session']['new']:
         return welcome_message()
     elif state == 'test':
-        return testing(event['request'])
+        return testing(event)
     elif 'menu' in intents:
         return menu()
     elif 'test' in intents:
