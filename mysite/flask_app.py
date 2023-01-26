@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 # Указываем путь к JSON с ключами для GoogleSheets
 googleSheetsAPI = gspread.service_account(filename='pyalice-68958b2cdb2b.json')
 
-# Открываем таблицу с тестом
+# Получаем таблицу с тестом
 tableWithTest = googleSheetsAPI.open_by_key('1r9DtG5vVRb71lgD-Mlr-42VhUog3q0HvkW7TvgpNbsM')
 # Получаем список тестовых вопросов
 list_test_questions = tableWithTest.sheet1.get_all_values()
@@ -45,7 +45,7 @@ def test():  # Запуск режима тестирования
            'Если не хочешь отвечать на вопрос, скажи: «Пропустить».\n' \
            'Команда: «Ответ Инита», поможет узнать правильный ответ.\n' \
            + list_test_questions[1][1]
-    return make_response(text, state='test', data_session={'currentQuestionIndex': 1})
+    return make_response(text, state='test', buttons=[button('Пропустить'), button('Ответ ИНИТА'), button('В меню')],  data_session={'currentQuestionIndex': 1})
 
 
 def testing(event):  # Процесс тестирования
@@ -66,7 +66,7 @@ def testing(event):  # Процесс тестирования
     # Проверяем ответы, если не сработали интенты
     if event['request'].get('command') == list_test_questions[current_question_index][2].lower():
         current_question_index += 1
-        text = 'Верный ответ\n\n' + list_test_questions[current_question_index][1]
+        text = 'Верный ответ\n' + list_test_questions[current_question_index][1]
     else:
         text = 'Не верный ответ'
 
@@ -97,7 +97,9 @@ def support():
 
 def learning():
     text = 'Давай начнем.\n' \
-           'Для повтора скажи: «Повторить»,\n для возврата в главное меню скажи: «Назад»,\n для перехода к следующему оператору скажи: «Дальше».'
+           'Для повтора скажи: «Повторить».\n ' \
+           'Для выхода в меню скажи: «Меню».\n' \
+           'Для перехода к следующему оператору скажи: «Дальше».'
     return make_response(text, state='learning')
 
 
