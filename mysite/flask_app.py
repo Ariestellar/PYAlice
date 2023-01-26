@@ -10,12 +10,12 @@ logging.basicConfig(level=logging.DEBUG)
 # Указываем путь к JSON с ключами для GoogleSheets
 googleSheetsAPI = gspread.service_account(filename='pyalice-68958b2cdb2b.json')
 
-#Открываем таблицу с тестом
+# Открываем таблицу с тестом
 tableWithTest = googleSheetsAPI.open_by_key('1r9DtG5vVRb71lgD-Mlr-42VhUog3q0HvkW7TvgpNbsM')
-#Получаем список тестовых вопросов
+# Получаем список тестовых вопросов
 list_test_questions = tableWithTest.sheet1.get_all_values()
-#Массив первого порядка это каждый вопрос массив второго порядка это элементы вопроса у них индексы:
-#Индексы:
+# Массив первого порядка это каждый вопрос массив второго порядка это элементы вопроса у них индексы:
+# Индексы:
 # 0 - номер по порядку
 # 1 - текст вопроса
 # 2 - ответ на вопрос
@@ -35,7 +35,7 @@ def make_response(text, state=None, buttons=None, data_session=None):
 
 def fallback(state):
     text = 'Прости, не расслышал, повтори ещё раз или выбери вручную.'
-    return make_response(text, state)  #Возвращаем текщее состояние, что бы не сбросилось
+    return make_response(text, state)  # Возвращаем текущее состояние, что бы не сбросилось
 
 
 def test():  # Запуск режима тестирования
@@ -49,11 +49,24 @@ def test():  # Запуск режима тестирования
 
 def testing(event):  # Процесс тестирования
     current_question_index = event['state']['session'].get('currentQuestionIndex', {})
+    intents = event['request'].get('nlu', {}).get('intents')
+    # Обрабатываем интенты «Пропустить» и «Ответ Инита»
+    if 'skip' in intents:
+        current_question_index += 1
+        text = list_test_questions[current_question_index][1]
+        return make_response(text, state='test', data_session={'currentQuestionIndex': current_question_index})
+    elif 'give_answer' in intents:
+        text = list_test_questions[current_question_index][3]
+        current_question_index += 1
+        return make_response(text, state='test', data_session={'currentQuestionIndex': current_question_index})
+
+    # Проверяем ответы, если не сработали интенты
     if event['request'].get('command') == list_test_questions[current_question_index][2].lower():
         current_question_index += 1
         text = 'Верный ответ' + list_test_questions[current_question_index][1]
     else:
         text = 'Не верный ответ'
+
     return make_response(text, state='test', data_session={'currentQuestionIndex': current_question_index})
 
 
@@ -69,7 +82,8 @@ def support():
            'Для начала тестирования скажи "Тест".' \
            'Я буду задавать вопросы по тегам Python и HTML.' \
            'Если ответишь неверно  -  подскажу правильный вариант.' \
-           'В разделе обучения расскажу какие теги HTML, операторы и ключевые слова Python существуют и для чего они используются. Если хочешь начать, скажи "Учиться".' \
+           'В разделе обучения расскажу какие теги HTML, операторы и ключевые слова Python существуют и для чего они ' \
+           'используются. Если хочешь начать, скажи "Учиться".' \
            'Чтобы связаться с моими авторами, скажи "Связаться с разработчиком" и опиши свой вопрос или пожелание.'
     # Кнопки: Связь с разработчиками, Тест, Учиться, Выход, Повтори
 
@@ -90,13 +104,17 @@ def welcome_message():
            'По другим вопросам тебе поможет команда: «Инита, помощь».' \
            'С чего начнём? ' \
            'Учимся или тестируем знания?'
-    return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'), button('Выход'), button('Повтори')])
+    return make_response(text,
+                         buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
+                                  button('Выход'), button('Повтори')])
 
 
 def menu():
     text = 'С чего начнём? ' \
            'Учимся или тестируем знания?'
-    return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'), button('Выход'), button('Повтори')])
+    return make_response(text,
+                         buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
+                                  button('Выход'), button('Повтори')])
 
 
 def goodbye_message():
@@ -111,10 +129,10 @@ def main():
     state = event['state']['session'].get('currentState', {})  # Достаем состояние из запроса
     if event['session']['new']:
         return welcome_message()
+    elif 'menu' in intents:  # Меню главнее теста т.к. в него можно вернутся откуда угодно
+        return menu()
     elif state == 'test':
         return testing(event)
-    elif 'menu' in intents:
-        return menu()
     elif 'test' in intents:
         return test()
     elif 'learning' in intents:
