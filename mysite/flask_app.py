@@ -64,7 +64,7 @@ def testing(event):  # Процесс тестирования
     # Проверяем ответы, если не сработали интенты
     if event['request'].get('command') == list_test_questions[current_question_index][2].lower():
         current_question_index += 1
-        text = 'Верный ответ' + list_test_questions[current_question_index][1]
+        text = 'Верный ответ\n' + list_test_questions[current_question_index][1]
     else:
         text = 'Не верный ответ'
 
