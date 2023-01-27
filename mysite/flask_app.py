@@ -121,11 +121,11 @@ def learning(event):
     if 'next' in intents:
         current_question_index += 1
         text = list_test_questions[current_question_index][3]
-        return make_response(text, state='test', buttons=buttons,
+        return make_response(text, state='learning', buttons=buttons,
                              data_session={'currentQuestionIndex': current_question_index})
     elif 'repeat' in intents:
         text = list_test_questions[current_question_index][3]
-        return make_response(text, state='test', buttons=buttons,
+        return make_response(text, state='learning', buttons=buttons,
                              data_session={'currentQuestionIndex': current_question_index})
 
     return make_response(text, state='learning', buttons=buttons)
