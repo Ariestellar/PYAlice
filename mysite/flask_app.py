@@ -14,12 +14,14 @@ googleSheetsAPI = gspread.service_account(filename='pyalice-68958b2cdb2b.json')
 tableWithTest = googleSheetsAPI.open_by_key('1r9DtG5vVRb71lgD-Mlr-42VhUog3q0HvkW7TvgpNbsM')
 # Получаем список тестовых вопросов
 list_test_questions = tableWithTest.sheet1.get_all_values()
+
+
 # Массив первого порядка это каждый вопрос массив второго порядка это элементы вопроса у них индексы:
 # Индексы:
 # 0 - номер по порядку
 # 1 - текст вопроса
 # 2 - ответ на вопрос
-# 3 - правильный развернутый ответ
+# 3 - правильный развернутый ответ (используется и в режиме обучения)
 
 
 def make_response(text, state=None, buttons=None, data_session=None):
@@ -38,16 +40,18 @@ def fallback(state):
     return make_response(text, state)  # Возвращаем текущее состояние, что бы не сбросилось
 
 
-def test():  # Запуск режима тестирования
+# Запустить режим тестирования
+def start_test_mode():  # Запуск режима тестирования
     text = 'Начинаю тестирование.\n' \
            'Операторы Python и теги HTML.\n' \
            'Для выхода в меню скажи: «Меню».\n' \
            'Если не хочешь отвечать на вопрос, скажи: «Пропустить».\n' \
            'Команда: «Ответ Инита», поможет узнать правильный ответ.\n' \
            + list_test_questions[1][1]
-    return make_response(text, state='test', buttons=[button('Пропустить'), button('Ответ ИНИТА'), button('В меню')],  data_session={'currentQuestionIndex': 1})
+    return make_response(text, state='test', buttons=[button('Пропустить'), button('Ответ ИНИТА'), button('В меню')],
+                         data_session={'currentQuestionIndex': 1})
 
-
+#Логика процесса тестирования
 def testing(event):  # Процесс тестирования
     buttons = [button('Пропустить'), button('Ответ ИНИТА'), button('В меню')]
     current_question_index = event['state']['session'].get('currentQuestionIndex', {})
@@ -56,12 +60,14 @@ def testing(event):  # Процесс тестирования
     if 'skip' in intents:
         current_question_index += 1
         text = list_test_questions[current_question_index][1]
-        return make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
+        return make_response(text, state='test', buttons=buttons,
+                             data_session={'currentQuestionIndex': current_question_index})
     elif 'give_answer' in intents:
         text = list_test_questions[current_question_index][3]
         current_question_index += 1
         text += '\n\n' + list_test_questions[current_question_index][1]
-        return make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
+        return make_response(text, state='test', buttons=buttons,
+                             data_session={'currentQuestionIndex': current_question_index})
 
     # Проверяем ответы, если не сработали интенты
     if event['request'].get('command') == list_test_questions[current_question_index][2].lower():
@@ -70,7 +76,8 @@ def testing(event):  # Процесс тестирования
     else:
         text = 'Не верный ответ'
 
-    return make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
+    return make_response(text, state='test', buttons=buttons,
+                         data_session={'currentQuestionIndex': current_question_index})
 
 
 def about_skill():
@@ -95,13 +102,33 @@ def support():
     return make_response(text)
 
 
-def learning():
+# Запустить режим обучения
+def start_learning_mode():
     text = 'Давай начнем.\n' \
            'Для повтора скажи: «Повторить».\n ' \
            'Для выхода в меню скажи: «Меню».\n' \
-           'Для перехода к следующему оператору скажи: «Дальше».'
-    return make_response(text, state='learning')
+           'Для перехода к следующему оператору скажи: «Дальше».\n'\
+            + list_test_questions[1][3]
+    return make_response(text, state='learning', buttons=[button('Повторить'), button('Дальше'), button('В меню')], data_session={'currentQuestionIndex': 1})
 
+#Логика процесса обучения
+def learning(event):
+    buttons = [button('Повторить'), button('Дальше'), button('В меню')]
+    current_question_index = event['state']['session'].get('currentQuestionIndex', {})
+    intents = event['request'].get('nlu', {}).get('intents')
+    text = ""
+    # Обрабатываем интенты «Дальше» и «Повторить»
+    if 'next' in intents:
+        current_question_index += 1
+        text = list_test_questions[current_question_index][3]
+        return make_response(text, state='test', buttons=buttons,
+                             data_session={'currentQuestionIndex': current_question_index})
+    elif 'repeat' in intents:
+        text = list_test_questions[current_question_index][3]
+        return make_response(text, state='test', buttons=buttons,
+                             data_session={'currentQuestionIndex': current_question_index})
+
+    return make_response(text, state='learning', buttons=buttons)
 
 def welcome_message():
     text = 'Привет! Меня зовут Инита.\n' \
@@ -141,9 +168,9 @@ def main():
     elif state == 'test':
         return testing(event)
     elif 'test' in intents:
-        return test()
+        return start_test_mode()
     elif 'learning' in intents:
-        return learning()
+        return start_learning_mode()
     else:
         return fallback(state)
 
