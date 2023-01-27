@@ -167,6 +167,8 @@ def main():
         return menu()
     elif state == 'test':
         return testing(event)
+    elif state == 'learning':
+        return learning(event)
     elif 'test' in intents:
         return start_test_mode()
     elif 'learning' in intents:
