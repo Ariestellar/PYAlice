@@ -1,3 +1,4 @@
+import random
 from flask import Flask, request
 import logging
 import git
@@ -17,6 +18,18 @@ tableWithReview = googleSheetsAPI.open_by_key('1fIbJDJD76Wal17r1a5GaJsspnBBDLwXq
 # Получаем список тестовых вопросов
 list_test_questions = tableWithTest.get_worksheet(0).get_all_values()#Первая страница с вопросами
 list_test_answer = tableWithTest.get_worksheet(1).get_all_values()#Вторая страница с возможными правильными ответами
+
+def set_random_order_questions(list_questions, list_answer):
+    list_question_number_order = list(range(1, len(list_questions)))
+    random.shuffle(list_question_number_order)
+    i = 0
+    for element in list_question_number_order:#обязательно должны быть равны количества строк в вопросах и ответах
+        list_questions[i+1] = list_questions[element]#0 - элемент пропускаем и переписываем в элементы по порядку нужные
+        list_answer[i+1] = list_questions[element]
+        i += 1
+
+
+set_random_order_questions(list_test_questions, list_test_answer)
 
 # Массив первого порядка это каждый вопрос массив второго порядка это элементы вопроса у них индексы:
 # Индексы:
