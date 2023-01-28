@@ -114,7 +114,7 @@ def support(event):
     if 'message_to_developers' in intents:
         text = event['request']['original_utterance']
         return make_response(text, state='support')
-    return make_response(text)
+    return make_response(text, state='support')
 
 
 # Запустить режим обучения
