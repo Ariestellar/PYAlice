@@ -197,7 +197,7 @@ def main():
     elif 'learning' in intents:
         return start_learning_mode()
     elif 'support' in intents:
-        return support(event)
+        return start_support_mode(event)
     else:
         return fallback(state)
 
