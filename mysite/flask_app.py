@@ -187,7 +187,7 @@ def main():
     elif 'about_skill' in intents:
         return about_skill()
     elif state == 'support':
-        return testing(event)
+        return support(event)
     elif state == 'test':
         return testing(event)
     elif state == 'learning':
