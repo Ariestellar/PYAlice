@@ -83,7 +83,7 @@ def testing(event):  # Процесс тестирования
         if event['request'].get('command') == right_answer.lower():
             current_question_index += 1
             text = 'Верный ответ\n' + list_test_questions[current_question_index][1]
-            make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
+            return make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
 
     tableWithReview.sheet1.append_row([current_question_index, event['request'].get('command')])#Записываем на вторую страницу, может быть не более 10000 записей
     text = 'Не верный ответ'
