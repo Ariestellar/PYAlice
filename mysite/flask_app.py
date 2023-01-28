@@ -111,10 +111,9 @@ def start_support_mode():
 def support(event):
     intents = event['request'].get('nlu', {}).get('intents')
     text = 'Пожалуйста, скажи или напиши своё пожелание, я передам его команде разработки.'
-    if 'support' in intents:
+    if 'message_to_developers' in intents:
+        text = event['request']['original_utterance']
         return make_response(text, state='support')
-
-    text = event['request']['original_utterance']
     return make_response(text)
 
 
