@@ -48,12 +48,14 @@ def start_test_mode():  # Запуск режима тестирования
            'Если не хочешь отвечать на вопрос, скажи: «Пропустить».\n' \
            'Команда: «Ответ Инита», поможет узнать правильный ответ.\n' \
            + list_test_questions[1][1]
-    return make_response(text, state='test', buttons=[button('Пропустить'), button('Ответ ИНИТА'), button('В меню')],
+    return make_response(text, state='test',
+                         buttons=[button('Пропустить'), button('Повторить'), button('Ответ ИНИТА'), button('В меню')],
                          data_session={'currentQuestionIndex': 1})
 
-#Логика процесса тестирования
+
+# Логика процесса тестирования
 def testing(event):  # Процесс тестирования
-    buttons = [button('Пропустить'), button('Ответ ИНИТА'), button('В меню')]
+    buttons = [button('Пропустить'), button('Повторить'), button('Ответ ИНИТА'), button('В меню')]
     current_question_index = event['state']['session'].get('currentQuestionIndex', {})
     intents = event['request'].get('nlu', {}).get('intents')
     # Обрабатываем интенты «Пропустить» и «Ответ Инита»
@@ -66,6 +68,10 @@ def testing(event):  # Процесс тестирования
         text = list_test_questions[current_question_index][3]
         current_question_index += 1
         text += '\n\n' + list_test_questions[current_question_index][1]
+        return make_response(text, state='test', buttons=buttons,
+                             data_session={'currentQuestionIndex': current_question_index})
+    elif 'repeat' in intents:
+        text = list_test_questions[current_question_index][1]
         return make_response(text, state='test', buttons=buttons,
                              data_session={'currentQuestionIndex': current_question_index})
 
@@ -83,11 +89,13 @@ def testing(event):  # Процесс тестирования
 def about_skill():
     text = 'Спасибо, что поинтересовались.\n' \
            ' Я могу рассказать об операторах Python и тегах HTML,\n' \
-           ' а также протестировать твои знания.'
-    return make_response(text)
+           ' а также протестировать твои знания.\n' \
+           + 'С чего начнём?\n' \
+             'Учимся или тестируем знания?'
+    return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Инита помощь'), button('Выход')])
 
 
-def support():
+def start_support_mode():
     text = 'Возможности "ИНИТА GO":\n' \
            'Для начала тестирования скажи "Тест".\n' \
            'Я буду задавать вопросы по тегам Python и HTML.\n' \
@@ -96,9 +104,17 @@ def support():
            'используются.\n' \
            'Если хочешь начать, скажи "Учиться".\n' \
            'Чтобы связаться с моими авторами, скажи "Связаться с разработчиком" и опиши свой вопрос или пожелание.'
-    # Кнопки: Связь с разработчиками, Тест, Учиться, Выход, Повтори
+    return make_response(text, state='support',
+                         buttons=[button('Связь с разработчиками'), button('Тест'), button('Учиться'), button('Выход'), button('Повтори')])
 
-    # Связь с разработчиками - 'Пожалуйста, скажи или напиши своё пожелание, я передам его команде разработки.'
+
+def support(event):
+    intents = event['request'].get('nlu', {}).get('intents')
+    text = 'Пожалуйста, скажи или напиши своё пожелание, я передам его команде разработки.'
+    if 'support' in intents:
+        return make_response(text, state='support')
+
+    text = event['request']['original_utterance']
     return make_response(text)
 
 
@@ -107,11 +123,13 @@ def start_learning_mode():
     text = 'Давай начнем.\n' \
            'Для повтора скажи: «Повторить».\n ' \
            'Для выхода в меню скажи: «Меню».\n' \
-           'Для перехода к следующему оператору скажи: «Дальше».\n'\
-            + list_test_questions[1][3]
-    return make_response(text, state='learning', buttons=[button('Повторить'), button('Дальше'), button('В меню')], data_session={'currentQuestionIndex': 1})
+           'Для перехода к следующему оператору скажи: «Дальше».\n' \
+           + list_test_questions[1][3]
+    return make_response(text, state='learning', buttons=[button('Повторить'), button('Дальше'), button('В меню')],
+                         data_session={'currentQuestionIndex': 1})
 
-#Логика процесса обучения
+
+# Логика процесса обучения
 def learning(event):
     buttons = [button('Повторить'), button('Дальше'), button('В меню')]
     current_question_index = event['state']['session'].get('currentQuestionIndex', {})
@@ -129,6 +147,7 @@ def learning(event):
                              data_session={'currentQuestionIndex': current_question_index})
 
     return make_response(text, state='learning', buttons=buttons)
+
 
 def welcome_message():
     text = 'Привет! Меня зовут Инита.\n' \
@@ -163,8 +182,12 @@ def main():
     state = event['state']['session'].get('currentState', {})  # Достаем состояние из запроса
     if event['session']['new']:
         return welcome_message()
-    elif 'menu' in intents:  # Меню главнее теста т.к. в него можно вернутся откуда угодно
+    elif 'menu' in intents:  # Меню главнее в него можно вернутся откуда угодно(поэтому в иерархии выше)
         return menu()
+    elif 'about_skill' in intents:
+        return about_skill()
+    elif state == 'support':
+        return testing(event)
     elif state == 'test':
         return testing(event)
     elif state == 'learning':
@@ -173,6 +196,8 @@ def main():
         return start_test_mode()
     elif 'learning' in intents:
         return start_learning_mode()
+    elif 'support' in intents:
+        return support(event)
     else:
         return fallback(state)
 
