@@ -115,7 +115,7 @@ def support(event):
         return make_response(text, state='support')
     else:
         text = event['request']['original_utterance']
-        return make_response(text, state='support')
+        return make_response(text)
 
 
 # Запустить режим обучения
