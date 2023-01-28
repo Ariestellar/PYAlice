@@ -25,7 +25,7 @@ def set_random_order_questions(list_questions, list_answer):
     i = 0
     for element in list_question_number_order:#обязательно должны быть равны количества строк в вопросах и ответах
         list_questions[i+1] = list_questions[element]#0 - элемент пропускаем и переписываем в элементы по порядку нужные
-        list_answer[i+1] = list_questions[element]
+        list_answer[i+1] = list_answer[element]
         i += 1
 
 
