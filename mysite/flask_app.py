@@ -1,5 +1,4 @@
 from flask import Flask, request
-import json
 import logging
 import git
 import gspread
@@ -84,7 +83,7 @@ def testing(event):  # Процесс тестирования
             current_question_index += 1
             text = 'Верный ответ\n' + list_test_questions[current_question_index][1]
             return make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
-        
+
     tableWithReview.get_worksheet(1).append_row([current_question_index, event['request'].get('command')])  # Записываем на вторую страницу, может быть не более 10000 записей
     text = 'Не верный ответ'
     return make_response(text, state='test', buttons=buttons,
@@ -170,12 +169,14 @@ def welcome_message():
                                   button('Выход'), button('Повтори')])
 
 
-def menu():
+def menu(event):
+    intents = event['request'].get('nlu', {}).get('intents')
+    buttons = [button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'), button('Выход'), button('Повтори')]
     text = 'С чего начнём?\n' \
            'Учимся или тестируем знания?'
-    return make_response(text,
-                         buttons=[button('Тест'), button('Учиться'), button('Что ты умеешь?'), button('Инита помощь'),
-                                  button('Выход'), button('Повтори')])
+    if 'repeat' in intents:
+        return make_response(text, state='test', buttons=buttons)
+    return make_response(text, buttons=buttons)
 
 
 def goodbye_message():
@@ -191,7 +192,7 @@ def main():
     if event['session']['new']:
         return welcome_message()
     elif 'menu' in intents:  # Меню главнее в него можно вернутся откуда угодно(поэтому в иерархии выше)
-        return menu()
+        return menu(event)
     elif 'about_skill' in intents:
         return about_skill()
     elif state == 'support':
