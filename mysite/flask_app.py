@@ -10,11 +10,13 @@ logging.basicConfig(level=logging.DEBUG)
 # Указываем путь к JSON с ключами для GoogleSheets
 googleSheetsAPI = gspread.service_account(filename='pyalice-68958b2cdb2b.json')
 
-# Получаем таблицу с тестом
+#mypyalice@pyalice.iam.gserviceaccount.com-сервисный аккаунт
+
+# Получаем нужные таблицы
 tableWithTest = googleSheetsAPI.open_by_key('1r9DtG5vVRb71lgD-Mlr-42VhUog3q0HvkW7TvgpNbsM')
+tableWithReview = googleSheetsAPI.open_by_key('1fIbJDJD76Wal17r1a5GaJsspnBBDLwXqeXt5WVMCGVA')
 # Получаем список тестовых вопросов
 list_test_questions = tableWithTest.sheet1.get_all_values()
-
 
 # Массив первого порядка это каждый вопрос массив второго порядка это элементы вопроса у них индексы:
 # Индексы:
@@ -90,7 +92,7 @@ def about_skill():
     text = 'Спасибо, что поинтересовались.\n' \
            ' Я могу рассказать об операторах Python и тегах HTML,\n' \
            ' а также протестировать твои знания.\n' \
-           + 'С чего начнём?\n' \
+           'С чего начнём?\n' \
              'Учимся или тестируем знания?'
     return make_response(text, buttons=[button('Тест'), button('Учиться'), button('Инита помощь'), button('Выход')])
 
@@ -114,7 +116,10 @@ def support(event):
         text = 'Пожалуйста, скажи или напиши своё пожелание, я передам его команде разработки.'
         return make_response(text, state='support')
     else:
-        text = event['request']['original_utterance']
+        tableWithReview.sheet1.append_row([event['request']['original_utterance']])
+        text = 'Сообщение успешно отправлено.\n' \
+               'С чего начнём?\n' \
+               'Учимся или тестируем знания?'
         return make_response(text)
 
 
