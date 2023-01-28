@@ -16,13 +16,14 @@ googleSheetsAPI = gspread.service_account(filename='pyalice-68958b2cdb2b.json')
 tableWithTest = googleSheetsAPI.open_by_key('1r9DtG5vVRb71lgD-Mlr-42VhUog3q0HvkW7TvgpNbsM')
 tableWithReview = googleSheetsAPI.open_by_key('1fIbJDJD76Wal17r1a5GaJsspnBBDLwXqeXt5WVMCGVA')
 # Получаем список тестовых вопросов
-list_test_questions = tableWithTest.sheet1.get_all_values()
+list_test_questions = tableWithTest.get_worksheet(0).get_all_values()#Первая страница с вопросами
+list_test_answer = tableWithTest.get_worksheet(1).get_all_values()#Вторая страница с возможными правильными ответами
 
 # Массив первого порядка это каждый вопрос массив второго порядка это элементы вопроса у них индексы:
 # Индексы:
 # 0 - номер по порядку
 # 1 - текст вопроса
-# 2 - ответ на вопрос
+# 2 - ответ на вопрос - написано для удобства тех кто читает гугл таблицу, а правильный список ответов получаем из другого листа таблицы list_test_answer
 # 3 - правильный развернутый ответ (используется и в режиме обучения)
 
 
@@ -78,12 +79,14 @@ def testing(event):  # Процесс тестирования
                              data_session={'currentQuestionIndex': current_question_index})
 
     # Проверяем ответы, если не сработали интенты
-    if event['request'].get('command') == list_test_questions[current_question_index][2].lower():
-        current_question_index += 1
-        text = 'Верный ответ\n' + list_test_questions[current_question_index][1]
-    else:
-        text = 'Не верный ответ'
+    for right_answer in list_test_answer[current_question_index]:
+        if event['request'].get('command') == right_answer.lower():
+            current_question_index += 1
+            text = 'Верный ответ\n' + list_test_questions[current_question_index][1]
+            make_response(text, state='test', buttons=buttons, data_session={'currentQuestionIndex': current_question_index})
 
+    tableWithReview.sheet1.append_row([current_question_index, event['request'].get('command')])#Записываем на вторую страницу, может быть не более 10000 записей
+    text = 'Не верный ответ'
     return make_response(text, state='test', buttons=buttons,
                          data_session={'currentQuestionIndex': current_question_index})
 
@@ -116,7 +119,7 @@ def support(event):
         text = 'Пожалуйста, скажи или напиши своё пожелание, я передам его команде разработки.'
         return make_response(text, state='support')
     else:
-        tableWithReview.sheet1.append_row([event['request']['original_utterance']])
+        tableWithReview.get_worksheet(0).append_row([event['request']['original_utterance']])#Записываем на первую страницу, может быть не более 10000 записей
         text = 'Сообщение успешно отправлено.\n' \
                'С чего начнём?\n' \
                'Учимся или тестируем знания?'
