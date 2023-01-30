@@ -228,7 +228,7 @@ def button(title, hide=True):
     return {'title': title, 'hide': hide, }
 
 
-#@app.route('/update_server', methods=['POST'])
+@app.route('/update_server', methods=['POST'])
 def webhook():
     if request.method == 'POST':
         git.cmd.Git().pull('https://github.com/Ariestellar/PYAlice', 'main')
