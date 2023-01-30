@@ -6,7 +6,7 @@ import gspread
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
-
+#
 # Указываем путь к JSON с ключами для GoogleSheets
 googleSheetsAPI = gspread.service_account(filename='pyalice-68958b2cdb2b.json')
 
